@@ -1,0 +1,9 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - RATE_LIMIT_PER_MINUTE=60
+      - ENV=prod
+    restart: unless-stopped

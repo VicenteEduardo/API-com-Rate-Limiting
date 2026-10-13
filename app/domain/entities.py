@@ -1,11 +1,15 @@
-"""Domain entities. Camada mais interna do DDD. Sem dependencias externas (DIP)."""
+"""Entidades do domínio — o coração do sistema.
+
+Repara que este ficheiro não importa nada de frameworks: nem FastAPI, nem
+banco de dados, nem HTTP. É Python puro, de propósito. A regra de negócio
+vive aqui e não depende de como a API é exposta lá fora — é isso que o DDD
+quer dizer com "camada mais interna".
+"""
 
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Optional
 from uuid import uuid4
 
 from app.domain.value_objects import Email
@@ -13,7 +17,13 @@ from app.domain.value_objects import Email
 
 @dataclass
 class User:
-    """Entidade User. Identidade por `id`. SRP: so representa o usuario."""
+    """Um utilizador do sistema.
+
+    A identidade é o `id`: dois utilizadores com o mesmo nome e e-mail
+    continuam a ser pessoas diferentes se os ids divergirem. O `rename`
+    existe para que a mudança de nome passe sempre pela mesma validação
+    da criação — uma única regra, um único lugar.
+    """
 
     name: str
     email: Email
@@ -29,6 +39,7 @@ class User:
         self.name = name
 
     def rename(self, new_name: str) -> None:
+        # Reaproveita a validação do construtor em vez de duplicá-la aqui.
         tmp = User(name=new_name, email=self.email, id=self.id, created_at=self.created_at)
         self.name = tmp.name
 

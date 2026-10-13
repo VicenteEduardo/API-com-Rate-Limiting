@@ -1,4 +1,9 @@
-"""Adaptadores de infraestrutura. DIP: implementam portas do dominio."""
+"""Guarda de utilizadores em memória — simples, rápida e segura entre threads.
+
+Serve para desenvolvimento e testes. Quando chegar a hora do Postgres, basta
+criar uma nova classe que cumpra o mesmo `IUserRepository`: os casos de uso
+nem vão reparar na troca. É o O de SOLID — extensão sem modificação.
+"""
 
 from __future__ import annotations
 
@@ -10,11 +15,11 @@ from app.domain.repositories import IUserRepository
 
 
 class InMemoryUserRepository(IUserRepository):
-    """Thread-safe. OCP: pode trocar por SQLAlchemy/Redis sem tocar em use cases."""
+    """Dicionários protegidos por lock: dois índices (por id e por e-mail)."""
 
     def __init__(self) -> None:
         self._by_id: Dict[str, User] = {}
-        self._by_email: Dict[str, str] = {}  # email -> id
+        self._by_email: Dict[str, str] = {}  # e-mail normalizado -> id
         self._lock = threading.Lock()
 
     def save(self, user: User) -> User:
@@ -34,6 +39,7 @@ class InMemoryUserRepository(IUserRepository):
 
     def list(self, limit: int = 20, offset: int = 0) -> List[User]:
         with self._lock:
+            # Ordem de chegada: os mais antigos primeiro, como uma fila justa.
             users = sorted(self._by_id.values(), key=lambda u: u.created_at)
             return users[offset : offset + limit]
 
@@ -50,6 +56,7 @@ class InMemoryUserRepository(IUserRepository):
             return len(self._by_id)
 
     def clear(self) -> None:
+        """Esvazia tudo — feita à medida dos testes, que gostam de recomeçar do zero."""
         with self._lock:
             self._by_id.clear()
             self._by_email.clear()

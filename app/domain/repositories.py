@@ -1,4 +1,13 @@
-"""Portas (interfaces) do dominio. ISP + DIP: interfaces pequenas, dominio nao conhece infra."""
+"""As "portas" do domínio: contratos, não implementações.
+
+Estas interfaces dizem *o que* o sistema precisa (guardar utilizadores,
+verificar o limite de requisições) sem dizer *como*. A infraestrutura —
+banco em memória hoje, Postgres ou Redis amanhã — é que cumpre o contrato.
+
+É o D de SOLID (Dependency Inversion) na prática: o domínio manda, a
+infraestrutura obedece. E são interfaces pequenas de propósito (o I de
+SOLID): ninguém é obrigado a implementar o que não usa.
+"""
 
 from __future__ import annotations
 
@@ -9,7 +18,7 @@ from app.domain.entities import User
 
 
 class IUserRepository(ABC):
-    """Porta de persistencia de User."""
+    """Tudo o que os casos de uso precisam para lidar com utilizadores."""
 
     @abstractmethod
     def save(self, user: User) -> User:
@@ -37,11 +46,16 @@ class IUserRepository(ABC):
 
 
 class IRateLimiter(ABC):
-    """Porta de rate limiting. Infra implementa (memoria, Redis...). LSP: qualquer impl. e substituivel."""
+    """Contrato do limitador de requisições.
+
+    Qualquer implementação — memória, Redis, a que inventares — pode ser
+    ligada sem tocar no resto do código (o L de SOLID: substituível sem
+    sustos). Devolve se o pedido passa e os números para os cabeçalhos HTTP.
+    """
 
     @abstractmethod
     def is_allowed(self, key: str) -> tuple:
-        """Retorna (allowed: bool, info: dict com limit/remaining/reset)."""
+        """Devolve (allowed, info) onde info traz limit/remaining/reset."""
         raise NotImplementedError
 
     @abstractmethod

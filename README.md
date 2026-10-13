@@ -2,20 +2,28 @@
 
 ## Objetivo do projeto
 
-Este projeto existe para mostrar, na pratica, como construir uma API em Python
-bem organizada desde o primeiro dia — sem virar uma "bola de neve" dificil de manter.
+Este projeto mostra, na prática, como construir uma API em Python bem organizada
+desde o primeiro commit — daquelas que continuam fáceis de entender e evoluir
+mesmo depois de meses em produção.
 
-A ideia e simples: uma API de usuarios (criar, listar, buscar, apagar) que serve
-de exemplo para estudar e aplicar conceitos que o mercado cobra:
+A proposta é simples de propósito: uma API de utilizadores (criar, listar,
+buscar e apagar) que serve de base para estudar e aplicar os conceitos que o
+mercado mais valoriza:
 
-- **DDD**: separar o que e regra de negocio do que e detalhe tecnico (HTTP, banco, etc.).
-- **SOLID**: deixar cada classe com uma responsabilidade clara e facil de trocar depois.
-- **TDD**: escrever o teste antes (ou junto) do codigo, para ter seguranca ao mudar.
-- **Rate Limiting**: proteger a API contra abuso, limitando quantas requisicoes cada IP pode fazer.
-- **Swagger**: documentar a API de forma automatica, para qualquer pessoa testar no navegador.
+- **DDD (Domain-Driven Design)** — separar a regra de negócio dos detalhes
+  técnicos (HTTP, banco de dados, frameworks), protegendo o coração do sistema.
+- **SOLID** — classes pequenas, cada uma com uma responsabilidade clara e
+  dependências explícitas, fáceis de testar e de trocar quando for preciso.
+- **TDD (Test-Driven Development)** — testes escritos junto com o código,
+  garantindo segurança para refatorar sem medo de quebrar o que já funciona.
+- **Rate Limiting** — proteção contra abuso, limitando o número de requisições
+  por cliente num intervalo de tempo, com resposta padronizada (HTTP 429).
+- **Swagger (OpenAPI)** — documentação viva e interativa, gerada a partir do
+  próprio código, para qualquer pessoa explorar e testar a API no navegador.
 
-Se voce entende este projeto, entende o esqueleto de quase qualquer API profissional:
-entra pedido pelo HTTP, vira caso de uso, mexe no dominio e volta como resposta.
+Se dominares a estrutura deste projeto, dominas o esqueleto de praticamente
+qualquer API profissional: o pedido chega pelo HTTP, transforma-se num caso
+de uso, atravessa a regra de negócio e regressa como resposta.
 
 ## Stack
 - **Python + FastAPI** (Swagger automatico em `/docs`, ReDoc em `/redoc`, OpenAPI em `/openapi.json`)

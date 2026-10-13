@@ -21,9 +21,10 @@ mercado mais valoriza:
 - **Swagger (OpenAPI)** — documentação viva e interativa, gerada a partir do
   próprio código, para qualquer pessoa explorar e testar a API no navegador.
 
-Se dominares a estrutura deste projeto, dominas o esqueleto de praticamente
-qualquer API profissional: o pedido chega pelo HTTP, transforma-se num caso
-de uso, atravessa a regra de negócio e regressa como resposta.
+Desenvolvi este projeto para demonstrar como estruturo uma API profissional:
+o pedido chega pelo HTTP, transforma-se num caso de uso, atravessa a regra
+de negócio isolada no domínio e regressa como resposta — com proteção de
+rate limiting, testes automatizados e documentação interativa.
 
 > **Nota:** esta API limita o número de pedidos que cada cliente pode fazer
 > num determinado período (60 requisições/minuto por IP, por defeito),

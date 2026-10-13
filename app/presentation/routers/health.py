@@ -1,4 +1,8 @@
-"""Health check — isento de rate limit."""
+"""Rota de saúde — propositadamente isenta do rate limit.
+
+Se o balanceador de carga não consegue cá chegar, nada mais interessa:
+por isso responde rápido, sem autenticação e sem contar para o limite.
+"""
 
 from fastapi import APIRouter
 

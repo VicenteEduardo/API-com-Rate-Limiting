@@ -1,4 +1,9 @@
-"""Schemas HTTP (Pydantic). Validacao de borda. Nao vazar entidades de dominio."""
+"""Schemas HTTP (Pydantic): validação na fronteira da API.
+
+Convertem e validam o JSON de entrada antes de chegar aos casos de uso, e
+definem o formato exato das respostas documentadas no Swagger. O domínio
+nunca vê estes objetos — e não precisa.
+"""
 
 from __future__ import annotations
 

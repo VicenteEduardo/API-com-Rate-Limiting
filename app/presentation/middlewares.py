@@ -1,15 +1,23 @@
-"""Middleware de Rate Limiting. SRP: so limita. DIP: recebe limiter + settings."""
+"""Middleware de rate limiting: protege todas as rotas (exceto as isentas).
+
+Funciona por cliente (IP, respeitando `X-Forwarded-For` atrás de proxies) e
+informa sempre o estado do limite nos cabeçalhos `X-RateLimit-*`, seguindo a
+convenção da indústria. Recebe as dependências prontas — nunca as cria.
+"""
 
 from __future__ import annotations
 
-from typing import Callable, Optional
+from typing import Callable
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
 from app.core.config import Settings
+from app.core.logging import get_logger
 from app.infrastructure.rate_limiter import InMemorySlidingWindowRateLimiter
+
+log = get_logger("app.ratelimit")
 
 
 def _client_ip(request: Request) -> str:
@@ -40,16 +48,15 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         key = f"ip:{_client_ip(request)}"
         allowed, info = self.limiter.is_allowed(key)
-        response: Response
         if not allowed:
-            response = JSONResponse(
+            log.warning("rate limit excedido para %s em %s", key, request.url.path)
+            response: Response = JSONResponse(
                 status_code=429,
                 content={"detail": "rate limit excedido. Tente novamente em instantes.", "code": "rate_limit_exceeded"},
             )
         else:
             response = await call_next(request)
 
-        # Headers padrao (IETF + X-RateLimit) — observabilidade
         response.headers["X-RateLimit-Limit"] = str(info["limit"])
         response.headers["X-RateLimit-Remaining"] = str(info["remaining"])
         response.headers["X-RateLimit-Reset"] = str(info["reset"])

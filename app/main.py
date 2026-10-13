@@ -1,4 +1,8 @@
-"""Composition root + Swagger. OCP: novos routers sem alterar nucleo."""
+"""Ponto de entrada: monta o FastAPI e liga todas as peças.
+
+Aqui não há regra de negócio — só composição: middlewares, handlers de erro
+e rotas. Juntar uma funcionalidade nova é registar um router; o núcleo não muda.
+"""
 
 from __future__ import annotations
 
@@ -7,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.presentation.dependencies import get_rate_limiter
+from app.presentation.exception_handlers import register_exception_handlers
 from app.presentation.middlewares import RateLimitMiddleware
 from app.presentation.routers import health, users
 
@@ -34,6 +39,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(RateLimitMiddleware, limiter=get_rate_limiter(), settings=settings)
+
+register_exception_handlers(app)
 
 app.include_router(health.router)
 app.include_router(users.router, prefix="/api/v1")

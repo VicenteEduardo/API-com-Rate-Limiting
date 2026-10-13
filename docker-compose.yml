@@ -1,3 +1,4 @@
+# Memoria por defeito (docker compose up). Postgres via perfil `postgres`.
 services:
   api:
     build: .
@@ -5,5 +6,32 @@ services:
       - "8000:8000"
     environment:
       - RATE_LIMIT_PER_MINUTE=60
-      - ENV=prod
+      - ENV=${ENV:-dev}
+      - DATABASE_URL=${DATABASE_URL:-}
     restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_started
+        required: false
+
+  # Sobe apenas com: docker compose --profile postgres up --build
+  # A API usa-o quando DATABASE_URL=postgresql+psycopg2://api:api@db:5432/api
+  db:
+    image: postgres:16-alpine
+    profiles: ["postgres"]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-api}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-api}
+      POSTGRES_DB: ${POSTGRES_DB:-api}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-api}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

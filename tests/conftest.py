@@ -1,9 +1,12 @@
-"""Fixtures compartilhadas (TDD)."""
+"""Fixtures partilhadas pelos testes de integração.
+
+Cada teste recebe um repositório e um limite de requisições isolados, para
+correrem em qualquer ordem sem interferência entre si.
+"""
 
 import pytest
 from fastapi.testclient import TestClient
 
-from app.infrastructure.rate_limiter import InMemorySlidingWindowRateLimiter
 from app.infrastructure.repositories import InMemoryUserRepository
 from app.main import app
 from app.presentation.dependencies import get_rate_limiter, get_repository
@@ -16,17 +19,8 @@ def repo():
 
 @pytest.fixture
 def client():
-    # isola cada teste de integracao: repo+limiter frescos
     test_repo = InMemoryUserRepository()
-    test_limiter = InMemorySlidingWindowRateLimiter(limit_per_minute=60)
     app.dependency_overrides[get_repository] = lambda: test_repo
-    # o middleware capturou a instancia original no startup; troca o objeto interno
-    import app.main as main_mod
-    from app.presentation.middlewares import RateLimitMiddleware
-
-    for m in app.user_middleware:
-        pass
-    # abordagem simples: limpa limiter global e injeta limite alto
     limiter = get_rate_limiter()
     limiter.reset_all()
     limiter.limit = 60

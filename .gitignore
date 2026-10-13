@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Ambiente e SO
+.env
+.DS_Store
+
+# Testes e qualidade
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Docker
+pgdata/

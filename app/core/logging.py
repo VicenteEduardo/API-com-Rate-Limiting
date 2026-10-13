@@ -1,4 +1,4 @@
-"""Logging estruturado simples."""
+"""Logging partilhado: uma configuração, um formato, todo o projeto."""
 
 import logging
 import sys
@@ -7,6 +7,7 @@ _configured = False
 
 
 def get_logger(name: str = "app") -> logging.Logger:
+    """Devolve um logger com saída estruturada para stdout (formato amigável a agregadores)."""
     global _configured
     logger = logging.getLogger(name)
     if not _configured:

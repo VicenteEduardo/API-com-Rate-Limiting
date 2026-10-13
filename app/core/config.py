@@ -1,30 +1,32 @@
-"""Config centralizada (12-factor). SRP: so leitura de env."""
+"""Configuração centralizada (12-factor): tudo vem do ambiente, com defeitos sensatos."""
 
 from __future__ import annotations
 
 from functools import lru_cache
 from typing import List
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
     app_name: str = "DDD API com Rate Limiting"
     app_version: str = "1.0.0"
     env: str = "dev"
 
-    # Rate limiting — sliding window em memoria (troque por Redis em prod)
+    # Rate limiting — janela deslizante em memória (evoluir para Redis em produção)
     rate_limit_per_minute: int = 60
-    rate_limit_burst: int = 10  # reservado p/ token bucket futuro
+    rate_limit_burst: int = 10  # reservado para futura estratégia token bucket
     rate_limit_enabled: bool = True
-    # rotas isentas (health/docs nunca bloqueiam)
+    # Rotas isentas: monitorização e documentação nunca devem ser bloqueadas
     rate_limit_exempt_paths: str = "/health,/docs,/redoc,/openapi.json"
 
     cors_origins: str = "*"
 
-    class Config:
-        env_file = ".env"
-        extra = "ignore"
+    # Base de dados. Vazia = repositório em memória (dev/testes).
+    # Ex.: postgresql+psycopg2://user:pass@db:5432/api
+    database_url: str = ""
 
     @property
     def exempt_paths(self) -> List[str]:

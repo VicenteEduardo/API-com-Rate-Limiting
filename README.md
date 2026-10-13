@@ -25,6 +25,10 @@ Se dominares a estrutura deste projeto, dominas o esqueleto de praticamente
 qualquer API profissional: o pedido chega pelo HTTP, transforma-se num caso
 de uso, atravessa a regra de negócio e regressa como resposta.
 
+> **Nota:** esta API limita o número de pedidos que cada cliente pode fazer
+> num determinado período (60 requisições/minuto por IP, por defeito),
+> respondendo com HTTP 429 e cabeçalho `Retry-After` quando o limite é excedido.
+
 ## Stack
 - **Python + FastAPI** (Swagger automatico em `/docs`, ReDoc em `/redoc`, OpenAPI em `/openapi.json`)
 - **DDD** em 4 camadas: `domain` → `application` → `infrastructure` → `presentation`

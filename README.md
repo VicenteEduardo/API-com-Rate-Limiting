@@ -2,9 +2,9 @@
 
 ## Objetivo do projeto
 
-Este projeto mostra, na prática, como construir uma API em Python bem organizada
-desde o primeiro commit — daquelas que continuam fáceis de entender e evoluir
-mesmo depois de meses em produção.
+Este projeto demonstra a construção de uma API em Python com arquitetura limpa
+e boas práticas de engenharia de software, com foco em manutenibilidade,
+testabilidade e escalabilidade.
 
 A proposta é simples de propósito: uma API de utilizadores (criar, listar,
 buscar e apagar) que serve de base para estudar e aplicar os conceitos que o

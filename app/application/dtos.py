@@ -26,6 +26,7 @@ class CreateUserOutput:
     id: str
     name: str
     email: str
+    role: str
     created_at: str
 
 
@@ -41,3 +42,26 @@ class ListUsersInput:
             raise ValueError("limit deve estar entre 1 e 100")
         if self.offset < 0:
             raise ValueError("offset deve ser >= 0")
+
+
+@dataclass(frozen=True)
+class RegisterUserInput:
+    """Registo público: entra sempre como `user` (promoção é ato de admin)."""
+
+    name: str
+    email: str
+    password: str
+
+
+@dataclass(frozen=True)
+class LoginInput:
+    email: str
+    password: str
+
+
+@dataclass(frozen=True)
+class TokenOutput:
+    access_token: str
+    token_type: str = "bearer"
+    user_id: str = ""
+    role: str = ""

@@ -22,3 +22,11 @@ class RateLimitExceededError(DomainError):
     def __init__(self, message: str = "rate limit excedido", retry_after: int = 60):
         super().__init__(message)
         self.retry_after = retry_after
+
+
+class InvalidCredentialsError(DomainError):
+    """E-mail desconhecido ou senha errada (resposta genérica de propósito)."""
+
+
+class ForbiddenError(DomainError):
+    """Autenticado, mas sem permissão para esta operação."""

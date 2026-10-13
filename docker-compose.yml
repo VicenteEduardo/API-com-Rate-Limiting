@@ -7,7 +7,9 @@ services:
     environment:
       - RATE_LIMIT_PER_MINUTE=60
       - ENV=${ENV:-dev}
-      - DATABASE_URL=${DATABASE_URL:-}
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///./data/app.db}
+    volumes:
+      - appdata:/code/data
     restart: unless-stopped
     depends_on:
       db:
@@ -35,3 +37,4 @@ services:
 
 volumes:
   pgdata:
+  appdata:

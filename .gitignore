@@ -16,3 +16,8 @@ htmlcov/
 
 # Docker
 pgdata/
+
+# Bases locais
+*.db
+*.sqlite3
+data/

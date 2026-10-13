@@ -18,9 +18,8 @@ def repo():
 
 
 @pytest.fixture
-def client():
-    test_repo = InMemoryUserRepository()
-    app.dependency_overrides[get_repository] = lambda: test_repo
+def client(repo):
+    app.dependency_overrides[get_repository] = lambda: repo
     limiter = get_rate_limiter()
     limiter.reset_all()
     limiter.limit = 60

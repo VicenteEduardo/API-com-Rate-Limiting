@@ -11,7 +11,12 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.core.logging import get_logger
-from app.domain.exceptions import UserAlreadyExistsError, UserNotFoundError
+from app.domain.exceptions import (
+    ForbiddenError,
+    InvalidCredentialsError,
+    UserAlreadyExistsError,
+    UserNotFoundError,
+)
 
 log = get_logger("app.errors")
 
@@ -24,6 +29,14 @@ def register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(UserAlreadyExistsError)
     async def conflict(_: Request, exc: UserAlreadyExistsError) -> JSONResponse:
         return JSONResponse(status_code=409, content={"detail": str(exc), "code": "user_already_exists"})
+
+    @app.exception_handler(InvalidCredentialsError)
+    async def unauthorized(_: Request, exc: InvalidCredentialsError) -> JSONResponse:
+        return JSONResponse(status_code=401, content={"detail": str(exc), "code": "invalid_credentials"})
+
+    @app.exception_handler(ForbiddenError)
+    async def forbidden(_: Request, exc: ForbiddenError) -> JSONResponse:
+        return JSONResponse(status_code=403, content={"detail": str(exc), "code": "forbidden"})
 
     @app.exception_handler(ValueError)
     async def unprocessable(_: Request, exc: ValueError) -> JSONResponse:

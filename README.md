@@ -2,26 +2,23 @@
 
 ## Objetivo do projeto
 
-Este projeto demonstra a construção de uma API em Python com arquitetura limpa
-e boas práticas de engenharia de software, com foco em manutenibilidade,
-testabilidade e escalabilidade.
+Desenvolvi esta API para demonstrar, de ponta a ponta, como estruturo uma
+aplicação profissional em Python — do domínio isolado à entrega em Docker.
 
-Desenvolvi esta API de utilizadores (criar, listar, buscar e apagar) para
-demonstrar como estruturo uma aplicação profissional: o pedido chega pelo HTTP,
-transforma-se num caso de uso, atravessa a regra de negócio isolada no domínio
-e regressa como resposta — com proteção de rate limiting, testes automatizados
-e documentação interativa. Os conceitos aplicados:
+**Funcional:** CRUD completo de utilizadores com autenticação via JWT e dois
+perfis de acesso — `admin` gere todos os utilizadores, `user` gere apenas os
+próprios dados. Validação de dados à entrada e erros HTTP consistentes
+(401/403/404/409/422). Persistência em SQLite por defeito, com PostgreSQL
+via `DATABASE_URL` — sem alterar os casos de uso.
 
-- **DDD (Domain-Driven Design)** — separação entre regra de negócio e detalhes
-  técnicos (HTTP, base de dados, frameworks), protegendo o núcleo do sistema.
-- **SOLID** — classes coesas, com responsabilidade única e dependências
-  explícitas, fáceis de testar e de substituir.
-- **TDD (Test-Driven Development)** — testes escritos junto com o código,
-  garantindo segurança para refatorar sem regressões.
-- **Rate Limiting** — proteção contra abuso, limitando o número de requisições
-  por cliente num intervalo de tempo, com resposta padronizada (HTTP 429).
-- **Swagger (OpenAPI)** — documentação interativa gerada a partir do próprio
-  código, permitindo explorar e testar a API no navegador.
+**Técnico:** DDD em 4 camadas (domain → application → infrastructure →
+presentation), desenvolvimento com TDD (ciclo Red → Green → Refactor, com
+`tests/unit` e `tests/integration`) e os 5 princípios SOLID aplicados (ver
+tabela abaixo). Rate limiting por IP com resposta 429 padronizada e
+documentação interativa em `/docs`.
+
+**Critério de sucesso:** `pytest` com todos os testes verdes, API a correr
+tanto via `uvicorn` como via `docker compose up`, explorável no Swagger.
 
 > **Nota:** esta API limita o número de pedidos que cada cliente pode fazer
 > num determinado período (60 requisições/minuto por IP, por defeito),
@@ -31,7 +28,7 @@ e documentação interativa. Os conceitos aplicados:
 - **Python + FastAPI** (Swagger em `/docs`, ReDoc em `/redoc`, OpenAPI em `/openapi.json`)
 - **DDD** em 4 camadas: `domain` → `application` → `infrastructure` → `presentation`
 - **Rate Limiting**: sliding window em memória por IP (60 req/min), cabeçalhos `X-RateLimit-*` + `Retry-After`, 429 padronizado
-- **Persistência**: em memória por defeito; PostgreSQL via SQLAlchemy com `DATABASE_URL`
+- **Persistência**: SQLite por defeito; PostgreSQL via `DATABASE_URL` (mesma interface)
 - **TDD**: `pytest` com testes unitários e de integração (`pytest -v`)
 - **SOLID**: mapeado abaixo
 - **Outros**: Pydantic v2, CORS, health check, paginação, injeção de dependência, Docker, `.env`
@@ -64,7 +61,7 @@ app/
   core/                    # configuração (.env) e logging
   domain/                  # núcleo: entidades, value objects, interfaces e erros
   application/             # casos de uso e DTOs
-  infrastructure/          # repositórios (memória/SQLAlchemy), rate limiter
+  infrastructure/          # repositórios (SQLite/Postgres/memória), rate limiter
   presentation/            # rotas HTTP, schemas, middlewares e handlers de erro
 tests/
   unit/                    # Email, User, casos de uso, rate limiter
@@ -95,9 +92,10 @@ desconhece o FastAPI — e é exatamente assim que deve ser.
   via construtor/DI (`Depends`); nunca instanciam infraestrutura diretamente.
 
 ## Persistência
-- Por defeito: **memória** (zero configuração; ideal para desenvolvimento e testes).
+- Por defeito: **SQLite** local (`./data/app.db`, zero configuração).
 - Com `DATABASE_URL`: **PostgreSQL via SQLAlchemy** (`SQLAlchemyUserRepository`,
   mesma interface `IUserRepository` — nenhum caso de uso é alterado).
+- Testes usam **memória** (`InMemoryUserRepository`): isolados e rápidos.
 - O `docker-compose` inclui o serviço `db` (Postgres 16) no perfil `postgres`.
 
 ## Rate Limiting
@@ -110,8 +108,12 @@ desconhece o FastAPI — e é exatamente assim que deve ser.
 
 ## Swagger
 Gerado automaticamente a partir das rotas e schemas:
-- `POST /api/v1/users` → 201 | 409 | 422 | 429
-- `GET /api/v1/users?limit=&offset=` | `GET /api/v1/users/{id}` | `DELETE /api/v1/users/{id}`
+- `POST /api/v1/auth/register` → 201 | 409 | 422 | 429
+- `POST /api/v1/auth/login` → 200 | 401
+- `GET /api/v1/auth/me` → 200 | 401
+- `GET /api/v1/users` (admin) → 200 | 403
+- `GET /api/v1/users/{id}` | `DELETE /api/v1/users/{id}` → 200/204 | 403 | 404
+- `PATCH /api/v1/users/{id}/role` (admin) → 200 | 403 | 404
 - `GET /health`
 
 ## TDD

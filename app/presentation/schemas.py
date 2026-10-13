@@ -23,6 +23,7 @@ class UserResponse(BaseModel):
     id: str
     name: str
     email: str
+    role: str
     created_at: str
 
 
@@ -42,3 +43,27 @@ class HealthResponse(BaseModel):
     status: str = "ok"
     version: str
     env: str
+
+
+class RegisterRequest(BaseModel):
+    model_config = ConfigDict(json_schema_extra={"example": {"name": "Ada Lovelace", "email": "ada@example.com", "password": "segredo123"}})
+
+    name: str = Field(min_length=2, max_length=120)
+    email: EmailStr
+    password: str = Field(min_length=8, max_length=128)
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=1, max_length=128)
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user_id: str
+    role: str
+
+
+class ChangeRoleRequest(BaseModel):
+    role: str = Field(pattern="^(admin|user)$")

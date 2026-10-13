@@ -23,7 +23,10 @@ def _to_entity(m: UserModel) -> User:
     created = m.created_at
     if created.tzinfo is None:
         created = created.replace(tzinfo=timezone.utc)
-    return User(name=m.name, email=Email(m.email), id=m.id, created_at=created)
+    return User(
+        name=m.name, email=Email(m.email), id=m.id, created_at=created,
+        password_hash=m.password_hash or "", role=m.role or "user",
+    )
 
 
 class SQLAlchemyUserRepository(IUserRepository):
@@ -38,11 +41,14 @@ class SQLAlchemyUserRepository(IUserRepository):
                     UserModel(
                         id=user.id, name=user.name,
                         email=str(user.email), created_at=user.created_at,
+                        password_hash=user.password_hash, role=user.role,
                     )
                 )
             else:
                 existing.name = user.name
                 existing.email = str(user.email)
+                existing.password_hash = user.password_hash
+                existing.role = user.role
             s.commit()
             return user
 

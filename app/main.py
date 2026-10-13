@@ -10,10 +10,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
-from app.presentation.dependencies import get_rate_limiter
+from app.presentation.dependencies import get_repository, get_rate_limiter
 from app.presentation.exception_handlers import register_exception_handlers
 from app.presentation.middlewares import RateLimitMiddleware
-from app.presentation.routers import health, users
+from app.presentation.routers import auth, health, users
 
 settings = get_settings()
 
@@ -43,7 +43,28 @@ app.add_middleware(RateLimitMiddleware, limiter=get_rate_limiter(), settings=set
 register_exception_handlers(app)
 
 app.include_router(health.router)
+app.include_router(auth.router, prefix="/api/v1")
 app.include_router(users.router, prefix="/api/v1")
+
+
+@app.on_event("startup")
+def seed_admin() -> None:
+    """Cria o primeiro admin se ADMIN_EMAIL/PASSWORD estiverem definidos e ainda não existir."""
+    s = get_settings()
+    if not (s.admin_email and s.admin_password):
+        return
+    from app.core.security import hash_password
+    from app.domain.entities import User
+    from app.domain.value_objects import Email
+
+    repo = get_repository()
+    if repo.get_by_email(s.admin_email) is None:
+        repo.save(
+            User(
+                name=s.admin_name, email=Email(s.admin_email),
+                password_hash=hash_password(s.admin_password), role="admin",
+            )
+        )
 
 
 @app.get("/", tags=["root"], summary="Raiz")

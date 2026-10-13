@@ -24,9 +24,17 @@ class Settings(BaseSettings):
 
     cors_origins: str = "*"
 
-    # Base de dados. Vazia = repositório em memória (dev/testes).
+    # Base de dados. SQLite local por defeito; Postgres via env.
     # Ex.: postgresql+psycopg2://user:pass@db:5432/api
-    database_url: str = ""
+    database_url: str = "sqlite:///./data/app.db"
+
+    # Auth (JWT). Em produção, definir SECRET_KEY forte via ambiente.
+    secret_key: str = "dev-secret-key-mudar-em-producao"
+    access_token_expire_minutes: int = 60
+    # Seed do primeiro admin no arranque (vazio = sem seed)
+    admin_email: str = ""
+    admin_password: str = ""
+    admin_name: str = "Admin"
 
     @property
     def exempt_paths(self) -> List[str]:
